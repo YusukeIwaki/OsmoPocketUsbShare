@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pocket gimbal camera with a cloud + check badge. Original artwork;
+     see design/app-icon.svg for the master source. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- gimbal side arms -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M31.7,27h0.1a2.2,2.2 0 0 1 2.2,2.2v5.1a2.2,2.2 0 0 1 -2.2,2.2h-0.1a2.2,2.2 0 0 1 -2.2,-2.2v-5.1a2.2,2.2 0 0 1 2.2,-2.2z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M68.2,27h0.1a2.2,2.2 0 0 1 2.2,2.2v5.1a2.2,2.2 0 0 1 -2.2,2.2h-0.1a2.2,2.2 0 0 1 -2.2,-2.2v-5.1a2.2,2.2 0 0 1 2.2,-2.2z" />
+    <!-- gimbal head -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M36.5,23.5h27a3.5,3.5 0 0 1 3.5,3.5v9a3.5,3.5 0 0 1 -3.5,3.5h-27a3.5,3.5 0 0 1 -3.5,-3.5v-9a3.5,3.5 0 0 1 3.5,-3.5z" />
+    <!-- lens -->
+    <path
+        android:fillColor="#073F39"
+        android:pathData="M44.4,31.5a5.6,5.6 0 1,0 11.2,0a5.6,5.6 0 1,0 -11.2,0z" />
+    <path
+        android:fillColor="#127A6E"
+        android:pathData="M47,31.5a3,3 0 1,0 6,0a3,3 0 1,0 -6,0z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M47.95,30.6a1.25,1.25 0 1,0 2.5,0a1.25,1.25 0 1,0 -2.5,0z" />
+    <!-- record dot -->
+    <path
+        android:fillColor="#FF6A5E"
+        android:pathData="M60.3,27.8a1.7,1.7 0 1,0 3.4,0a1.7,1.7 0 1,0 -3.4,0z" />
+    <!-- neck -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M46,39.5h8v6h-8z" />
+    <!-- body / handle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M43.5,45h13a6,6 0 0 1 6,6v23.5a6,6 0 0 1 -6,6h-13a6,6 0 0 1 -6,-6v-23.5a6,6 0 0 1 6,-6z" />
+    <!-- screen -->
+    <path
+        android:fillColor="#073F39"
+        android:pathData="M43.1,49h13.8a1.6,1.6 0 0 1 1.6,1.6v9.8a1.6,1.6 0 0 1 -1.6,1.6h-13.8a1.6,1.6 0 0 1 -1.6,-1.6v-9.8a1.6,1.6 0 0 1 1.6,-1.6z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48.2,52.7v5.6l5.2,-2.8z" />
+    <!-- buttons -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#0B4F47"
+        android:strokeWidth="1.15"
+        android:pathData="M42.55,67.5a2.25,2.25 0 1,0 4.5,0a2.25,2.25 0 1,0 -4.5,0z" />
+    <path
+        android:fillColor="#0B4F47"
+        android:pathData="M44.05,67.5a0.75,0.75 0 1,0 1.5,0a0.75,0.75 0 1,0 -1.5,0z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#0B4F47"
+        android:strokeWidth="1.15"
+        android:pathData="M50.55,67.5a2.25,2.25 0 1,0 4.5,0a2.25,2.25 0 1,0 -4.5,0z" />
+    <path
+        android:fillColor="#0B4F47"
+        android:pathData="M52.05,67.5a0.75,0.75 0 1,0 1.5,0a0.75,0.75 0 1,0 -1.5,0z" />
+    <!-- grip line -->
+    <path
+        android:fillColor="#590B4F47"
+        android:pathData="M45.2,74h7.6a0.7,0.7 0 0 1 0.7,0.7a0.7,0.7 0 0 1 -0.7,0.7h-7.6a0.7,0.7 0 0 1 -0.7,-0.7a0.7,0.7 0 0 1 0.7,-0.7z" />
+    <!-- cloud crest -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#2F6BFF"
+        android:strokeWidth="1.9"
+        android:strokeLineJoin="round"
+        android:pathData="M59.5,64.5C56.3,64.5 53.9,62.2 54.1,59.2C54.3,56.5 56.2,54.6 58.8,54.2C60.2,51 63.6,49.3 67.4,49.8C71,50.2 73.4,52.2 74.3,55C77.6,54.7 80.5,56.8 81.1,59.9C81.6,63 79.3,64.5 76.2,64.5Z" />
+    <!-- check circle -->
+    <path
+        android:fillColor="#2F6BFF"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
+        android:pathData="M57.5,72.5a10.5,10.5 0 1,0 21,0a10.5,10.5 0 1,0 -21,0z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M62.8,72.6l3.7,3.6 7.1,-7.6" />
+</vector>

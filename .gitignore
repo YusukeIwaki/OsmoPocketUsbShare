@@ -1,0 +1,19 @@
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/app/build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+/example_movies
+/evaluation/out/
+website/node_modules/
+website/dist/
+website/.astro/
+# Real-device captures at the screenshots root contain personal photos.
+# Only the synthetic instrumentation evidence under screenshots/test/ is tracked.
+/screenshots/*.png

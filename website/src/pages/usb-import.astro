@@ -1,0 +1,33 @@
+---
+import Layout from "../layouts/Layout.astro";
+import DeviceFrame from "../components/DeviceFrame.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="USB取り込み">
+  <h1>USB取り込み</h1>
+  <p class="lead">Osmo Pocket 4は、USBでつなぐとUSBメモリのようなストレージとして扱えます。このアプリはその領域から写真・動画を読みます。MTPのような転送手順は使いません。</p>
+
+  <div class="cols">
+    <div>
+      <h2>さす前・さした後</h2>
+      <p>何もつながっていないとき、画面に出るのは「USBでOsmo Pocketをさしてください」だけです。つながると自動で検出して一覧が表示されます。ケーブルを抜けば、また待機画面に戻ります。</p>
+
+      <h2>読み取りのしくみ</h2>
+      <table class="spec">
+        <tr><th>検出</th><td>USB機器の接続と、リムーバブルなストレージボリュームのマウントを見張ります。</td></tr>
+        <tr><th>一覧化</th><td>USBボリューム上の写真・動画を新しい順に並べます。DCIM配下もたどります。</td></tr>
+        <tr><th>代替経路</th><td>環境によってストレージが見えない場合は、フォルダを一度選ぶ方式（SAF）でも取り込めます。</td></tr>
+        <tr><th>元ファイル</th><td>読み取り専用です。Osmo Pocket側のファイルを書き換えたり消したりはしません。</td></tr>
+      </table>
+
+      <h2>撮影日時の決め方</h2>
+      <p>写真はExif、動画は埋め込みメタデータの日時を優先します。どちらも無いときだけ、DJI形式のファイル名（<code>DJI_20261107…</code>）から日時を補います。ファイルの更新日時から撮影日時を作ることはしません。</p>
+    </div>
+    <DeviceFrame src={`${base}shots/01_no_usb.png`} alt="USB未接続時の待機画面" caption="未接続時はこの画面だけ。さすと自動で一覧に切り替わります。" />
+  </div>
+
+  <div class="next">
+    <p><strong>次に読む:</strong> <a href={`${base}video-slim/`}>2K圧縮の考え方</a> — どのロジックで、どこまで画質を保つか。</p>
+  </div>
+</Layout>

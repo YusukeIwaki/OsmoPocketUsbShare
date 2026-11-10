@@ -1,0 +1,49 @@
+<!-- OsmoPocket USB Share app icon. Original artwork.
+     Motifs: (1) pocket gimbal camera, (2) cloud + check (export done / cloud sync).
+     Master for PNG generation (design/generate-icons.sh) and the source of the
+     Android vector drawables in app/src/main/res/drawable/ic_launcher_*.xml.
+     ViewBox 0 0 108 108 matches the adaptive-icon viewport (108dp). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1BB6A3"/>
+      <stop offset="0.55" stop-color="#0F766E"/>
+      <stop offset="1" stop-color="#073F39"/>
+    </linearGradient>
+  </defs>
+  <g id="background">
+    <rect width="108" height="108" fill="url(#bg)"/>
+    <circle cx="88" cy="14" r="30" fill="#FFFFFF" opacity="0.07"/>
+    <circle cx="12" cy="96" r="22" fill="#FFFFFF" opacity="0.05"/>
+  </g>
+  <g id="foreground">
+    <!-- pocket gimbal camera -->
+    <rect x="29.5" y="27" width="4.5" height="9.5" rx="2.2" fill="#FFFFFF"/>
+    <rect x="66" y="27" width="4.5" height="9.5" rx="2.2" fill="#FFFFFF"/>
+    <rect x="33" y="23.5" width="34" height="16" rx="3.5" fill="#FFFFFF"/>
+    <circle cx="50" cy="31.5" r="5.6" fill="#073F39"/>
+    <circle cx="50" cy="31.5" r="3.0" fill="#127A6E"/>
+    <circle cx="49.2" cy="30.6" r="1.25" fill="#FFFFFF"/>
+    <circle cx="62" cy="27.8" r="1.7" fill="#FF6A5E"/>
+    <rect x="46" y="39.5" width="8" height="6" fill="#FFFFFF"/>
+    <rect x="37.5" y="45" width="25" height="35.5" rx="6" fill="#FFFFFF"/>
+    <rect x="41.5" y="49" width="17" height="13" rx="1.6" fill="#073F39"/>
+    <path d="M48.2 52.7 L48.2 58.3 L53.4 55.5 Z" fill="#FFFFFF"/>
+    <circle cx="44.8" cy="67.5" r="2.25" fill="none" stroke="#0B4F47" stroke-width="1.15"/>
+    <circle cx="44.8" cy="67.5" r="0.75" fill="#0B4F47"/>
+    <circle cx="52.8" cy="67.5" r="2.25" fill="none" stroke="#0B4F47" stroke-width="1.15"/>
+    <circle cx="52.8" cy="67.5" r="0.75" fill="#0B4F47"/>
+    <rect x="44.5" y="74" width="9" height="1.4" rx="0.7" fill="#0B4F47" opacity="0.35"/>
+    <!-- cloud + check badge -->
+    <path d="M59.5 64.5
+             C56.3 64.5 53.9 62.2 54.1 59.2
+             C54.3 56.5 56.2 54.6 58.8 54.2
+             C60.2 51 63.6 49.3 67.4 49.8
+             C71 50.2 73.4 52.2 74.3 55
+             C77.6 54.7 80.5 56.8 81.1 59.9
+             C81.6 63 79.3 64.5 76.2 64.5 Z"
+          fill="#FFFFFF" stroke="#2F6BFF" stroke-width="1.9" stroke-linejoin="round"/>
+    <circle cx="68" cy="72.5" r="10.5" fill="#2F6BFF" stroke="#FFFFFF" stroke-width="2.4"/>
+    <path d="M62.8 72.6 L66.5 76.2 L73.6 68.6" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

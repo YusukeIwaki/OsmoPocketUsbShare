@@ -1,0 +1,109 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = "Osmo Pocket 4の写真・動画をUSBで取り込み、2Kに圧縮してGoogleフォトへ。" } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="icon" type="image/png" sizes="512x512" href={`${base}app-icon-512.png`} />
+    <title>{title} | OsmoPocket USB Share</title>
+    <style is:global>
+      :root {
+        --ink: #191c1e;
+        --sub: #4c545a;
+        --line: #d9dde0;
+        --accent: #0f766e;
+        --accent-ink: #0b5a54;
+        --paper: #ffffff;
+        --wash: #eef1f2;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
+        line-height: 1.75;
+      }
+      a { color: var(--accent-ink); }
+      header.site {
+        border-bottom: 1px solid var(--line);
+        position: sticky;
+        top: 0;
+        background: var(--paper);
+        z-index: 10;
+      }
+      .bar {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 14px 20px;
+        display: flex;
+        align-items: baseline;
+        gap: 28px;
+        flex-wrap: wrap;
+      }
+      .brand { font-weight: 700; font-size: 1.05rem; color: var(--ink); text-decoration: none; letter-spacing: .01em; }
+      nav.main { display: flex; gap: 18px; flex-wrap: wrap; font-size: .92rem; }
+      nav.main a { color: var(--sub); text-decoration: none; }
+      nav.main a:hover { color: var(--ink); text-decoration: underline; }
+      main { max-width: 1080px; margin: 0 auto; padding: 40px 20px 72px; }
+      h1 { font-size: 2rem; line-height: 1.35; margin: 0 0 16px; font-weight: 700; }
+      h2 { font-size: 1.3rem; margin: 44px 0 12px; padding-top: 20px; border-top: 1px solid var(--line); }
+      h2:first-of-type { border-top: 0; padding-top: 0; }
+      p.lead { font-size: 1.08rem; color: var(--sub); max-width: 44em; }
+      .cols { display: grid; grid-template-columns: 1.2fr .8fr; gap: 36px; align-items: start; }
+      @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+      figure.shot { margin: 0; }
+      figure.shot img { width: 100%; max-width: 300px; border: 1px solid var(--line); display: block; }
+      figcaption { font-size: .85rem; color: var(--sub); margin-top: 8px; }
+      table.spec { border-collapse: collapse; width: 100%; font-size: .94rem; }
+      table.spec th, table.spec td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+      table.spec th { background: var(--wash); font-weight: 600; width: 28%; }
+      ul.plain { padding-left: 1.2em; }
+      .next { margin-top: 48px; padding: 18px 20px; background: var(--wash); }
+      .next p { margin: 4px 0; }
+      footer.site { border-top: 1px solid var(--line); }
+      footer.site .bar { color: var(--sub); font-size: .88rem; align-items: center; }
+      .btn {
+        display: inline-block;
+        background: var(--accent);
+        color: #fff;
+        text-decoration: none;
+        padding: 10px 18px;
+        font-weight: 600;
+      }
+      .note { font-size: .9rem; color: var(--sub); }
+    </style>
+  </head>
+  <body>
+    <header class="site">
+      <div class="bar">
+        <a class="brand" href={`${base}`}>OsmoPocket USB Share</a>
+        <nav class="main">
+          <a href={`${base}browse/`}>写真・動画を見る</a>
+          <a href={`${base}usb-import/`}>USB取り込み</a>
+          <a href={`${base}video-slim/`}>2K圧縮</a>
+          <a href={`${base}export/`}>エクスポート</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site">
+      <div class="bar">
+        <span>OsmoPocket USB Share — Osmo Pocket 4からGoogleフォトへ、いちばん短い経路で。</span>
+        <span>Android / Pixelシリーズ向け</span>
+      </div>
+    </footer>
+  </body>
+</html>

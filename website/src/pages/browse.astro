@@ -1,0 +1,37 @@
+---
+import Layout from "../layouts/Layout.astro";
+import DeviceFrame from "../components/DeviceFrame.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="写真・動画を見る">
+  <h1>写真・動画を見る</h1>
+  <p class="lead">Googleフォトに渡す前に、中身を確認して選ぶための画面です。凝った整理機能は入れず、選んで書き出すことに集中しています。</p>
+
+  <div class="cols">
+    <div>
+      <h2>グリッドとリスト</h2>
+      <p>右上のボタンでグリッド表示とリスト表示を切り替えます。リストではサムネイル・ファイル名・ファイルサイズと撮影日時が並ぶので、名前で探したいときやサイズを確認したいときに便利です。</p>
+
+      <h2>選ぶ</h2>
+      <ul class="plain">
+        <li>長押しで選択モードに入り、そのまま複数選べます。</li>
+        <li>選択をすべて外すと、選択モードは自動で終わります。</li>
+        <li>選択中は上部のバーに件数が出て、そのままエクスポートできます。</li>
+      </ul>
+      <p class="note">ドラッグでの範囲選択や並べ替えは、あえて入れていません。</p>
+
+      <h2>詳細を見る</h2>
+      <p>タップすると詳細が開き、左右スワイプで次々とめくれます。下部には撮影日時とファイルサイズを必ず表示し、解像度や動画の長さ、形式も確認できます。詳細画面のメニューから、その1件だけをエクスポートすることもできます。</p>
+      <p>戻る操作は画面遷移どおりに働きます。選択モード中に戻ると、まず選択だけが解除されます。</p>
+    </div>
+    <div>
+      <DeviceFrame src={`${base}shots/test_list.png`} alt="リスト表示" caption="リスト表示。ファイル名・サイズ・撮影日時が一目でわかります。" />
+      <DeviceFrame src={`${base}shots/03_detail.png`} alt="詳細画面" caption="詳細画面。撮影日時とファイルサイズを必ず表示します。" />
+    </div>
+  </div>
+
+  <div class="next">
+    <p><strong>次に読む:</strong> <a href={`${base}usb-import/`}>USB取り込みのしくみ</a> — さしたときに何が起きているか。</p>
+  </div>
+</Layout>

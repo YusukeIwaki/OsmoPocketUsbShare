@@ -1,0 +1,90 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+const { src, alt, caption } = Astro.props;
+---
+
+<figure class="device-figure">
+  <div class="device" role="img" aria-label={alt}>
+    <span class="device-btn device-btn-power"></span>
+    <span class="device-btn device-btn-volume"></span>
+    <div class="device-screen">
+      <span class="device-camera"></span>
+      <img src={src} alt={alt} loading="lazy" />
+    </div>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .device-figure {
+    margin: 0;
+    width: min(272px, 78vw);
+  }
+  .device-figure + .device-figure {
+    margin-top: 28px;
+  }
+  /* Pixel-like frame: dark bezel, large corner radius, punch-hole camera, side keys. */
+  .device {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1080 / 2424;
+    background: #101214;
+    border: 1px solid #2c3134;
+    border-radius: 46px;
+    padding: 11px;
+    box-shadow: 0 14px 34px rgb(0 0 0 / 0.18);
+  }
+  .device-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 36px;
+    background: #000;
+  }
+  .device-screen img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: top center;
+  }
+  .device-camera {
+    position: absolute;
+    z-index: 2;
+    top: 12px;
+    left: 50%;
+    width: 13px;
+    height: 13px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: #050607;
+    box-shadow: inset 0 0 0 2px #1e2427, inset 0 0 3px 1px #3d4a52;
+    pointer-events: none;
+  }
+  .device-btn {
+    position: absolute;
+    right: -2px;
+    width: 3px;
+    border-radius: 2px;
+    background: #3a4044;
+  }
+  .device-btn-power {
+    top: 132px;
+    height: 52px;
+  }
+  .device-btn-volume {
+    top: 196px;
+    height: 84px;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--sub);
+    margin-top: 10px;
+    width: 100%;
+  }
+</style>

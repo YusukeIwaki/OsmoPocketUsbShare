@@ -1,0 +1,36 @@
+---
+import Layout from "../layouts/Layout.astro";
+import DeviceFrame from "../components/DeviceFrame.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="トップ">
+  <div class="cols">
+    <div>
+      <h1>Osmo Pocket 4の動画を、<br />軽くしてGoogleフォトへ。</h1>
+      <p class="lead">
+        OsmoPocket USB Shareは、Osmo Pocket 4をUSBでつなぐだけで写真・動画を取り込み、
+        動画は2K（2560×1440）に圧縮してから、Googleフォトが見える場所へ書き出すAndroidアプリです。
+        アップロードそのものはGoogleフォトアプリに任せるので、面倒なアカウント連携は要りません。
+      </p>
+      <p><a class="btn" href={`${base}usb-import/`}>使い方を見る</a></p>
+
+      <h2>できること</h2>
+      <ul class="plain">
+        <li><a href={`${base}usb-import/`}>USB取り込み</a> — さすだけで一覧表示。MTPではなく、USBメモリとしてマウントされるストレージから読みます。</li>
+        <li><a href={`${base}browse/`}>写真・動画を見る</a> — グリッド／リスト切替、長押しで複数選択、詳細ではスワイプ移動とメタデータ確認。</li>
+        <li><a href={`${base}video-slim/`}>2K圧縮</a> — 4K動画を長辺2560に縮小し、ビットレートを自動調整。Pixelのハードウェアエンコーダで高速に処理します。</li>
+        <li><a href={`${base}export/`}>エクスポート</a> — アプリを閉じても裏で継続。進捗はデータベースに残り、キャンセルしてもゴミは残りません。</li>
+      </ul>
+
+      <h2>流れは3ステップ</h2>
+      <table class="spec">
+        <tr><th>1. さす</th><td>USB-CケーブルでOsmo Pocket 4とスマホをつなぎます。待機画面は「USBでOsmo Pocketをさしてください」だけです。</td></tr>
+        <tr><th>2. 選ぶ</th><td>写真・動画がグリッドで並びます。残したいものをタップ、または長押しでまとめて選びます。</td></tr>
+        <tr><th>3. エクスポート</th><td>写真はそのまま、動画は2Kに圧縮して <code>DCIM/OsmoPocketUsbShare</code> へ。あとはGoogleフォトが自動で同期します。</td></tr>
+      </table>
+      <p class="note">静止画は変換しません。撮ったままのファイルをそのまま書き出します。</p>
+    </div>
+    <DeviceFrame src={`${base}shots/02_grid.png`} alt="取り込んだ写真・動画のグリッド一覧" caption="取り込み直後の一覧。動画には長さが表示されます。" />
+  </div>
+</Layout>

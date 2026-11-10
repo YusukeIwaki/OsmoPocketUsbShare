@@ -1,0 +1,16 @@
+== DJI_20261107094517_0001_D duration=2519.083233s sample_start=1254.5416165s
+slim_ssim=0.989384
+gl_ssim=0.988001
+-rw-r--r--  1 yusuke-iwaki  staff    15M Nov  7 22:22 evaluation/out/DJI_20261107094517_0001_D_gl.mp4
+-rw-r--r--  1 yusuke-iwaki  staff    15M Nov  7 22:22 evaluation/out/DJI_20261107094517_0001_D_slim.mp4
+== DJI_20261107103824_0002_D duration=163.882667s sample_start=76.9413335s
+slim_ssim=0.989554
+gl_ssim=0.988792
+-rw-r--r--  1 yusuke-iwaki  staff    15M Nov  7 22:22 evaluation/out/DJI_20261107103824_0002_D_gl.mp4
+-rw-r--r--  1 yusuke-iwaki  staff    15M Nov  7 22:22 evaluation/out/DJI_20261107103824_0002_D_slim.mp4
+== DJI_20261107114219_0006_D duration=104.037267s sample_start=47.0186335s
+slim_ssim=0.942220
+gl_ssim=0.937305
+-rw-r--r--  1 yusuke-iwaki  staff    15M Nov  7 22:23 evaluation/out/DJI_20261107114219_0006_D_gl.mp4
+-rw-r--r--  1 yusuke-iwaki  staff    15M Nov  7 22:23 evaluation/out/DJI_20261107114219_0006_D_slim.mp4
+DONE

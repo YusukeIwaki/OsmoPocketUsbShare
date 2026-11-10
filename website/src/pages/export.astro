@@ -1,0 +1,39 @@
+---
+import Layout from "../layouts/Layout.astro";
+import DeviceFrame from "../components/DeviceFrame.astro";
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="エクスポート">
+  <h1>エクスポート</h1>
+  <p class="lead">書き出しは時間のかかる作業です。だから画面に張り付かなくて済むよう、処理は裏側のサービスが担い、画面は記録を見せるだけにしています。</p>
+
+  <div class="cols">
+    <div>
+      <h2>閉じても続く</h2>
+      <p>エクスポートを始めると、フォアグラウンドサービスが1件ずつ処理します。アプリを閉じても、他のアプリを開いても処理は続きます。進み具合は通知でも確認でき、状態はデータベースに残るので、アプリを開き直せば続きから状況がわかります。</p>
+
+      <h2>書き出し先</h2>
+      <p>出力先は端末の <code>DCIM/OsmoPocketUsbShare</code> です。Googleフォトアプリが見つけられる場所なので、あとは普段どおり自動同期に任せられます。このアプリ自体はGoogleアカウントにアクセスしません。</p>
+
+      <h2>キャンセルと後片付け</h2>
+      <ul class="plain">
+        <li>待機中・処理中のどちらでもキャンセルできます（画面のボタン、または通知から）。</li>
+        <li>キャンセルすると作業用の一時ファイルは消え、中途半端な出力が残ることはありません。</li>
+        <li>途中で失敗した件は「失敗」と表示され、元ファイルには影響しません。</li>
+      </ul>
+
+      <h2>はじめ方</h2>
+      <table class="spec">
+        <tr><th>1件だけ</th><td>詳細画面を開き、メニューから「エクスポート」。</td></tr>
+        <tr><th>まとめて</th><td>一覧で長押しして複数選び、上部または下部のボタンから「エクスポート」。</td></tr>
+        <tr><th>状況確認</th><td>一覧のメニューにある「エクスポート状況」からいつでも開けます。</td></tr>
+      </table>
+    </div>
+    <DeviceFrame src={`${base}shots/06_exports_completed.png`} alt="エクスポート完了画面" caption="完了すると出力サイズと保存先が表示されます。" />
+  </div>
+
+  <div class="next">
+    <p><strong>あわせて読む:</strong> <a href={`${base}browse/`}>写真・動画を見る</a> — 選択と詳細の操作。</p>
+  </div>
+</Layout>
