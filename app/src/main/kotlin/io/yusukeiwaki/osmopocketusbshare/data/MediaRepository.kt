@@ -2,8 +2,10 @@ package io.yusukeiwaki.osmopocketusbshare.data
 
 import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
 import android.hardware.usb.UsbManager
 import android.net.Uri
+import android.os.Build
 import android.os.storage.StorageManager
 import android.provider.MediaStore
 import android.provider.DocumentsContract
@@ -13,15 +15,36 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * Media sources, in priority order:
+ * The last selected SAF folder is authoritative once configured. Before the first choice,
+ * discover media from these sources:
  * 1. MediaStore volumes other than the primary internal volume (a USB OTG stick / Osmo Pocket
  *    mounted as mass storage is indexed by MediaStore under its own volume name).
- * 2. A user-granted SAF tree (persisted URI permission) — fallback when MediaStore cannot see the volume.
- * 3. Removable StorageVolume directories scanned directly (DCIM / root) when readable.
- * 4. App inbox folder (getExternalFilesDir("usb_inbox")) — used for diagnostics and instrumentation tests
+ * 2. Removable StorageVolume directories scanned directly (DCIM / root) when readable.
+ * 3. App inbox folder (getExternalFilesDir("usb_inbox")) — used for diagnostics and instrumentation tests
  *    to simulate a mounted OTG volume without physical hardware.
  */
 class MediaRepository(private val context: Context) {
+    private val folderPreferences = context.getSharedPreferences("usb_folder", Context.MODE_PRIVATE)
+    private val rememberedFolder = RememberedFolder(object : RememberedFolder.Storage {
+        override var lastUri: String?
+            get() = folderPreferences.getString("last_tree_uri", null)
+            set(value) { folderPreferences.edit().putString("last_tree_uri", value).apply() }
+
+        override fun readableTreeGrants() = context.contentResolver.persistedUriPermissions
+            .filter { it.isReadPermission && isTreeUri(it.uri) }
+            .map { RememberedFolder.Grant(it.uri.toString(), it.persistedTime) }
+
+        override fun persistReadPermission(uri: String) {
+            context.contentResolver.takePersistableUriPermission(Uri.parse(uri), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    })
+
+    fun savedFolderUri(): Uri? = rememberedFolder.uri()?.let(Uri::parse)
+
+    fun rememberSafTree(uri: Uri): Result<Unit> {
+        if (!isTreeUri(uri)) return Result.failure(IllegalArgumentException("Not a document tree"))
+        return rememberedFolder.remember(uri.toString())
+    }
 
     fun isUsbConnected(): Boolean {
         val usbManager = context.getSystemService(UsbManager::class.java)
@@ -38,33 +61,40 @@ class MediaRepository(private val context: Context) {
      * The tree only counts while its root document actually exists (volume still mounted).
      */
     fun safTreeAvailable(): Boolean {
-        for (permission in context.contentResolver.persistedUriPermissions) {
-            if (!permission.isReadPermission) continue
-            val available = runCatching {
-                androidx.documentfile.provider.DocumentFile.fromTreeUri(context, permission.uri)?.exists() == true
-            }.getOrDefault(false)
-            if (available) return true
-        }
-        return false
+        val uri = savedFolderUri() ?: return false
+        return runCatching {
+            val tree = DocumentFile.fromTreeUri(context, uri)
+            tree?.isDirectory == true && tree.canRead()
+        }.getOrDefault(false)
     }
 
-    fun hasSafTree(): Boolean =
-        context.contentResolver.persistedUriPermissions.any { it.isReadPermission && it.uri != null }
+    fun hasSafTree(): Boolean = savedFolderUri() != null
 
     /**
      * Intent that opens the system folder picker at the removable USB volume.
      * On devices where MediaStore does not index the USB volume (observed with Osmo Pocket 4's
      * composite RNDIS+mass-storage device on Android 17), the SAF tree grant is the working path.
-     * StorageVolume.createOpenDocumentTreeIntent() is the supported way to land on that volume;
-     * a hand-built EXTRA_INITIAL_URI tree URI was ignored by DocumentsUI in testing.
+     * Start at the saved document, or DCIM on the current USB volume. EXTRA_INITIAL_URI
+     * must refer to a document URI; a bare tree URI is ignored by DocumentsUI.
      */
     fun openTreeIntent(): android.content.Intent {
         val storageManager = context.getSystemService(StorageManager::class.java)
         val volume = storageManager?.storageVolumes?.firstOrNull { it.isRemovable && it.uuid != null }
-        if (volume != null) {
-            runCatching { return volume.createOpenDocumentTreeIntent() }
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && volume != null) {
+            runCatching { volume.createOpenDocumentTreeIntent() }.getOrNull()
+        } else null
+        return (intent ?: Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)).apply {
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            val saved = savedFolderUri()
+            val savedId = saved?.let { runCatching { DocumentsContract.getTreeDocumentId(it) }.getOrNull() }
+            val initialUri = when {
+                saved != null && savedId != null && (volume == null || savedId.startsWith("${volume.uuid}:")) ->
+                    DocumentsContract.buildDocumentUriUsingTree(saved, savedId)
+                volume != null -> DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", "${volume.uuid}:DCIM")
+                else -> null
+            }
+            if (initialUri != null) putExtra(DocumentsContract.EXTRA_INITIAL_URI, initialUri)
         }
-        return android.content.Intent(android.content.Intent.ACTION_OPEN_DOCUMENT_TREE)
     }
 
     fun inboxDir(): File = File(context.getExternalFilesDir(null), "usb_inbox").apply { mkdirs() }
@@ -89,19 +119,29 @@ class MediaRepository(private val context: Context) {
 
     suspend fun loadMedia(): List<MediaItem> = withContext(Dispatchers.IO) {
         val items = LinkedHashMap<String, MediaItem>()
-        runCatching { loadFromMediaStoreVolumes(items) }
-        runCatching { loadFromSafTree(items) }
-        runCatching { loadFromRemovableVolumes(items) }
-        runCatching { loadFromInbox(items) }
-        // The same physical files can be reported by several sources at once (e.g. after a
-        // replug MediaStore indexes the volume while the SAF tree grant still lists it, or
-        // overlapping folder grants cover the same DCIM). Without this cross-source dedupe
-        // the grid shows every photo/video twice.
+        val savedItems = rememberedFolder.load { savedUri ->
+            val tree = DocumentFile.fromTreeUri(context, Uri.parse(savedUri))
+            check(tree?.isDirectory == true && tree.canRead())
+            val folderItems = LinkedHashMap<String, MediaItem>()
+            collectDocumentFile(tree, folderItems, depth = 0)
+            folderItems.values.toList()
+        }
+        if (savedItems != null) {
+            // A saved folder scopes the import, even if it is empty or temporarily missing.
+            // Other USB volumes and old grants must not hide the need to reselect it.
+            savedItems.forEach { items[it.id] = it }
+        } else {
+            runCatching { loadFromMediaStoreVolumes(items) }
+            runCatching { loadFromRemovableVolumes(items) }
+            runCatching { loadFromInbox(items) }
+        }
+        // Automatic discovery may report the same file through MediaStore and direct paths.
         dedupeAcrossSources(items.values)
             .sortedWith(compareByDescending<MediaItem> { it.dateTakenMillis ?: 0L }.thenBy { it.displayName })
     }
 
     private fun loadFromMediaStoreVolumes(out: MutableMap<String, MediaItem>) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
         val volumes = MediaStore.getExternalVolumeNames(context).filter { it != MediaStore.VOLUME_EXTERNAL_PRIMARY }
         for (volume in volumes) {
             queryVolume(MediaStore.Images.Media.getContentUri(volume), MediaKind.PHOTO, volume, out)
@@ -152,14 +192,6 @@ class MediaRepository(private val context: Context) {
         }
     }
 
-    private fun loadFromSafTree(out: MutableMap<String, MediaItem>) {
-        for (permission in context.contentResolver.persistedUriPermissions) {
-            if (!permission.isReadPermission) continue
-            val tree = DocumentFile.fromTreeUri(context, permission.uri) ?: continue
-            collectDocumentFile(tree, out, depth = 0)
-        }
-    }
-
     private fun collectDocumentFile(dir: DocumentFile, out: MutableMap<String, MediaItem>, depth: Int) {
         if (depth > 4) return
         for (child in dir.listFiles()) {
@@ -192,6 +224,7 @@ class MediaRepository(private val context: Context) {
     }
 
     private fun loadFromRemovableVolumes(out: MutableMap<String, MediaItem>) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
         val storageManager = context.getSystemService(StorageManager::class.java) ?: return
         for (volume in storageManager.storageVolumes) {
             if (!volume.isRemovable) continue
@@ -255,8 +288,7 @@ class MediaRepository(private val context: Context) {
 
     companion object {
         /**
-         * Cross-source dedupe: sources are loaded in priority order (MediaStore, SAF,
-         * removable volumes, inbox), and the same physical file reported by a later source
+         * Cross-source dedupe: the same physical file reported by a later source
          * (different URI, same display name and exact byte size) is dropped. Items whose
          * size is unknown keep their own identity and are never merged.
          */

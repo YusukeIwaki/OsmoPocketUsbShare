@@ -23,18 +23,29 @@ Osmo Pocket 4をUSB（OTG・マスストレージ）でAndroidに接続し、写
 - 処理はフォアグラウンドサービスが1件ずつ実行し、アプリを閉じても継続します。状態はSQLiteに保存され、画面はそれを表示するだけです。
 - キャンセル時は一時ファイルを削除し、未完成のMediaStoreエントリも残しません。プロセスが強制終了された場合の一時ファイルも、次回サービス起動時に掃除します。
 
-USBの読み取りは、MediaStoreのUSBボリューム → SAFで許可されたフォルダ → リムーバブルボリューム直下のDCIM、の順に探します。
+USBフォルダを一度選ぶと、そのフォルダと読み取り許可を保存し、アプリの再起動・USBの再接続後も自動で読み込みます。旧バージョンで許可済みの場合は、最後に許可したフォルダを引き継ぎます。読み込めた場合はフォルダ選択を表示せず、フォルダが見つからない・権限がない・写真や動画がない場合に別のフォルダを選択できます。USB未接続時にも保存先は保持します。
+
+マウント完了の通常通知が届かないUSBストレージでも、保存したフォルダのプロバイダの変更通知で自動的に読み直します。
+
+選択前はMediaStoreのUSBボリュームと、直接読み取れるリムーバブルボリュームを自動検索します。フォルダ選択が必要な場合は、前回のフォルダまたはUSB内のDCIMを起点にシステムの選択画面を開きます。
 
 ## ビルドとテスト
 
 ```bash
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
 ./gradlew :app:assembleDebug
-# 実機／エミュレータ接続時
+# 単体テスト: フォルダの保存・引き継ぎ・切断／再接続・権限失効など
+./gradlew :app:testDebugUnitTest
+# 実機の設定・履歴を変更しないフォルダ選択UIテスト
+./gradlew :app:connectedDebugAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=io.yusukeiwaki.osmopocketusbshare.RememberedFolderUiTest
+# USBを外したテスト専用端末／エミュレータで実行（既存のフォルダ許可・履歴を初期化）
 ./gradlew :app:connectedDebugAndroidTest
 ```
 
-Instrumentation Test（`OsmoPocketUiTest`、8件）で、未接続表示・グリッド／リスト切替・選択解除・詳細スワイプとメタデータ・戻る遷移・写真／動画エクスポート・キャンセル時の後片付けを自動確認しています。証跡は [test_report.html](test_report.html) を参照してください。
+`RememberedFolderTest`（単体テスト11件）で保存先の引き継ぎ・再利用・切断後の再試行・権限失効などを、`RememberedFolderUiTest`（実機UIテスト6件）でフォルダ選択の表示条件を確認します。
+
+既存のInstrumentation Test（`OsmoPocketUiTest`）では、未接続表示・グリッド／リスト切替・選択解除・詳細スワイプとメタデータ・戻る遷移・写真／動画エクスポート・キャンセル時の後片付けを自動確認しています。証跡は [test_report.html](test_report.html) を参照してください。
 
 ## 動画変換の評価
 

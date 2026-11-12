@@ -109,11 +109,13 @@ fun BrowserScreen(
                                     text = { Text("エクスポート状況") },
                                     onClick = { menuExpanded = false; onOpenExports() },
                                 )
-                                DropdownMenuItem(
-                                    text = { Text("USBフォルダを開く") },
-                                    onClick = { menuExpanded = false; onPickFolder() },
-                                    leadingIcon = { Icon(Icons.Filled.FolderOpen, contentDescription = null) },
-                                )
+                                if (state.canPickFolder) {
+                                    DropdownMenuItem(
+                                        text = { Text("USBフォルダを開く") },
+                                        onClick = { menuExpanded = false; onPickFolder() },
+                                        leadingIcon = { Icon(Icons.Filled.FolderOpen, contentDescription = null) },
+                                    )
+                                }
                             }
                         }
                     },
@@ -140,13 +142,27 @@ fun BrowserScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text("写真や動画が見つかりませんでした", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "端末によっては、USB内のフォルダへのアクセス許可が必要です。下のボタンからOsmo PocketのDCIMフォルダを選んで許可してください。一度許可すれば、次回からは自動で読み込みます。",
+                        if (state.savedFolderUri != null) "前回のフォルダに写真や動画が見つかりませんでした" else "写真や動画が見つかりませんでした",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        if (state.savedFolderUri != null) {
+                            "USB接続を確認するか、DCIM内のフォルダを選び直してください。選んだフォルダは記憶され、次回から自動で読み込みます。"
+                        } else {
+                            "Osmo PocketのDCIM内にある写真・動画のフォルダを選んでください。選んだフォルダは記憶され、次回から自動で読み込みます。"
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    if (state.folderPermissionError) {
+                        Text(
+                            "フォルダへのアクセス許可を保存できませんでした。もう一度選択してください。",
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.testTag("folderPermissionError"),
+                        )
+                    }
                     androidx.compose.material3.Button(onClick = onPickFolder, modifier = Modifier.testTag("pickFolderButton")) {
-                        Text("USBフォルダを開く")
+                        Text(if (state.savedFolderUri != null) "別のUSBフォルダを選ぶ" else "USBフォルダを開く")
                     }
                 }
                 state.layout == BrowserLayout.GRID -> LazyVerticalGrid(

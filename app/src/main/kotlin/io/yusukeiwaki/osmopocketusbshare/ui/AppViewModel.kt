@@ -26,9 +26,12 @@ data class BrowserUiState(
     val items: List<MediaItem> = emptyList(),
     val layout: BrowserLayout = BrowserLayout.GRID,
     val selectedIds: Set<String> = emptySet(),
+    val savedFolderUri: String? = null,
+    val folderPermissionError: Boolean = false,
 ) {
     val selectionMode: Boolean get() = selectedIds.isNotEmpty()
     val selectedItems: List<MediaItem> get() = items.filter { it.id in selectedIds }
+    val canPickFolder: Boolean get() = usbConnected && !loading && items.isEmpty()
 }
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
@@ -53,50 +56,67 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Resume-time entry point: the ViewModel (and its loaded media) already survives
      * configuration changes, so a plain resume/rotation must NOT trigger a full rescan.
-     * Only rescan when nothing has loaded yet or the USB connection state actually changed.
+     * Retry an empty/missing folder, or rescan when USB or saved-folder availability changed.
      */
     fun refreshOnResume() {
         if (!initialLoadDone) {
+            if (refreshJob?.isActive != true) refresh()
+            return
+        }
+        if (_state.value.items.isEmpty()) {
             refresh()
             return
         }
         viewModelScope.launch {
             // Connection checks talk to system providers over Binder; keep them off the main
             // thread so rotation/redraw is never stalled behind them.
-            val connectedNow = withContext(Dispatchers.IO) { repository.isUsbConnected() }
-            if (connectedNow != _state.value.usbConnected) refresh()
+            val needsRefresh = withContext(Dispatchers.IO) {
+                repository.isUsbConnected() != _state.value.usbConnected ||
+                    (_state.value.savedFolderUri != null && !repository.safTreeAvailable())
+            }
+            if (needsRefresh) refresh()
         }
     }
 
     private var refreshJob: kotlinx.coroutines.Job? = null
+    private var refreshPending = false
 
     fun refresh() {
-        // Coalesce overlapping triggers (startup, resume, broadcasts): parallel scans over
-        // USB only make each other slower.
+        // Serialize scans, but retain a trigger received during a scan (especially a new
+        // folder grant or a mount event). Otherwise the old scan can leave the UI empty.
+        refreshPending = true
         if (refreshJob?.isActive == true) return
         refreshJob = viewModelScope.launch {
-            // Keep showing current content during a rescan; the spinner is only for the first load.
-            if (_state.value.items.isEmpty()) {
-                _state.value = _state.value.copy(loading = true)
-            }
-            val startedAt = System.currentTimeMillis()
-            val (connected, items) = withContext(Dispatchers.IO) {
-                val nowConnected = repository.isUsbConnected()
-                nowConnected to if (nowConnected) repository.loadMedia() else emptyList()
-            }
-            android.util.Log.d(
-                "OsmoPocketUsb",
-                "refresh: connected=$connected items=${items.size} took=${System.currentTimeMillis() - startedAt}ms",
-            )
-            // Drop selections for media that vanished (e.g. USB removed) so stale ids never linger.
-            val validIds = items.map { it.id }.toSet()
-            _state.value = _state.value.copy(
-                usbConnected = connected,
-                loading = false,
-                items = items,
-                selectedIds = _state.value.selectedIds.intersect(validIds),
-            )
-            initialLoadDone = true
+            do {
+                refreshPending = false
+                // Keep showing current content during a rescan; the spinner is only for the first load.
+                if (_state.value.items.isEmpty()) {
+                    _state.value = _state.value.copy(loading = true)
+                }
+                val startedAt = System.currentTimeMillis()
+                val (connected, items, savedFolderUri) = withContext(Dispatchers.IO) {
+                    val nowConnected = repository.isUsbConnected()
+                    Triple(
+                        nowConnected,
+                        if (nowConnected) repository.loadMedia() else emptyList(),
+                        repository.savedFolderUri()?.toString(),
+                    )
+                }
+                android.util.Log.d(
+                    "OsmoPocketUsb",
+                    "refresh: connected=$connected items=${items.size} took=${System.currentTimeMillis() - startedAt}ms",
+                )
+                // Drop selections for media that vanished (e.g. USB removed) so stale ids never linger.
+                val validIds = items.map { it.id }.toSet()
+                _state.value = _state.value.copy(
+                    usbConnected = connected,
+                    loading = false,
+                    items = items,
+                    selectedIds = _state.value.selectedIds.intersect(validIds),
+                    savedFolderUri = savedFolderUri,
+                )
+                initialLoadDone = true
+            } while (refreshPending)
         }
     }
 
@@ -149,12 +169,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onSafTreeGranted(uri: Uri) {
         viewModelScope.launch {
-            runCatching {
-                getApplication<Application>().contentResolver.takePersistableUriPermission(
-                    uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION,
-                )
+            val saved = withContext(Dispatchers.IO) { repository.rememberSafTree(uri) }
+            _state.value = _state.value.copy(folderPermissionError = saved.isFailure)
+            if (saved.isSuccess) {
+                refresh()
             }
-            refresh()
         }
     }
 

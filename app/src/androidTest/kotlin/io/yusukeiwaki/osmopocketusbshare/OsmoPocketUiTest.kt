@@ -75,6 +75,7 @@ class OsmoPocketUiTest {
                 )
             }
         }
+        appContext.getSharedPreferences("usb_folder", Context.MODE_PRIVATE).edit().clear().commit()
         // Note: never delete the live DB file here — the app process holds it open.
         // Export assertions below filter by each test's unique file name instead.
         // Start each test with an empty export history (batches + children) so batch

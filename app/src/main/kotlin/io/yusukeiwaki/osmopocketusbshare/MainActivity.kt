@@ -6,9 +6,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.database.ContentObserver
 import android.hardware.usb.UsbManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -129,6 +133,22 @@ fun OsmoPocketApp(viewModel: AppViewModel = viewModel(), openExportsSignal: Int 
         ContextCompat.registerReceiver(context, receiver, usbFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
         ContextCompat.registerReceiver(context, receiver, mediaFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
         onDispose { runCatching { context.unregisterReceiver(receiver) } }
+    }
+
+    // Some cameras mount as a SAF-only volume: Android emits no MEDIA_MOUNTED broadcast
+    // for them. The provider notifies its observers when the volume becomes available.
+    DisposableEffect(context, state.savedFolderUri) {
+        val resolver = context.contentResolver
+        val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean) {
+                viewModel.refresh()
+            }
+        }
+        state.savedFolderUri?.let { savedUri ->
+            // Observe the granted tree, rather than requesting access to all provider roots.
+            runCatching { resolver.registerContentObserver(Uri.parse(savedUri), true, observer) }
+        }
+        onDispose { resolver.unregisterContentObserver(observer) }
     }
 
     // Rescan on resume only when the connection state changed (rotation alone must not reload).
